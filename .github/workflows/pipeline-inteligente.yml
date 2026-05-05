@@ -1,0 +1,45 @@
+name: Pipeline Inteligente
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 2 * * *'
+  push:
+    branches:
+      - 'feature/*'
+    paths:
+      - 'src/**'
+      - '!src/docs/**'
+
+jobs:
+  job_gerador:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Criar pasta e relatorios
+        run: |
+          mkdir saida_build
+          echo "Este é o relatorio 1" > saida_build/relatorio1.txt
+          echo "Este é o relatorio 2" > saida_build/relatorio2.txt
+          
+      - name: Salvar Artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: meus-relatorios-oficiais
+          path: saida_build/
+
+  job_auditoria:
+    runs-on: ubuntu-latest
+    needs: job_gerador
+    steps:
+      - name: Recuperar Artefato
+        uses: actions/download-artifact@v4
+        with:
+          name: meus-relatorios-oficiais
+
+      - name: Listar e exibir relatorio
+        run: |
+          ls -R
+          cat relatorio1.txt
